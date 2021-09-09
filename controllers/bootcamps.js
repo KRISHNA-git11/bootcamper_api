@@ -35,6 +35,19 @@ exports.getBootcamp = asyncHandler(async (req, res, next) => {
 // @route POST /api/v1/bootcamps
 // @access PRIVATE
 exports.createBootcamps = asyncHandler(async (req, res, next) => {
+  // Add user to req.body
+  req.body.user = req.user.id;
+  // Check for published bootcamps
+  const publishedBootcamps = await Bootcamp.findOne({ user: req.user.id });
+  // If the user is not an admin they can add onlu one bootcamp
+  if (publishedBootcamps && req.user.role !== 'admin') {
+    return next(
+      new ErrorResponse(
+        `The user with id ${req.user.id} has already created a bootcamp`,
+        400
+      )
+    );
+  }
   const bootcamp = await Bootcamp.create(req.body);
   res.status(201).json({
     sucess: true,
@@ -46,10 +59,7 @@ exports.createBootcamps = asyncHandler(async (req, res, next) => {
 // @route PUT /api/v1/bootcamps/:id
 // @access PRIVATE
 exports.updateBootcamps = asyncHandler(async (req, res, next) => {
-  const bootcamp = await Bootcamp.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true,
-  });
+  let bootcamp = await Bootcamp.findById(req.params.id);
   if (!bootcamp) {
     return next(
       new ErrorResponse(
@@ -58,6 +68,20 @@ exports.updateBootcamps = asyncHandler(async (req, res, next) => {
       )
     );
   }
+
+  // Check if the user is the owner of the bootcamp or not
+  if (bootcamp.user.toString() !== req.user.id && req.user.role !== 'admin') {
+    return next(
+      new ErrorResponse(
+        `User ${req.user.id} is not authorized to update the bootcamp`
+      )
+    );
+  }
+
+  bootcamp = await Bootcamp.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
   res.status(200).json({
     success: true,
     body: bootcamp,
@@ -74,6 +98,14 @@ exports.deleteBootcamps = asyncHandler(async (req, res, next) => {
       new ErrorResponse(
         `Bootcamp not found with the id of ${req.params.id}`,
         404
+      )
+    );
+  }
+  // Check if the user is the owner of the bootcamp or not
+  if (bootcamp.user.toString() !== req.user.id && req.user.role !== 'admin') {
+    return next(
+      new ErrorResponse(
+        `User ${req.user.id} is not authorized to delete the bootcamp`
       )
     );
   }
@@ -112,7 +144,7 @@ exports.getBootcampsInRadius = asyncHandler(async (req, res, next) => {
   });
 });
 
-// @desc Upload photo for bootcam[]
+// @desc Upload photo for bootcamp
 // @route PUT /api/v1/bootcamps/:id/photo
 // @access PRIVATE
 exports.bootcampPhotoUpload = asyncHandler(async (req, res, next) => {
