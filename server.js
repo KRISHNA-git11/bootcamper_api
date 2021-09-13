@@ -6,6 +6,8 @@ const dotenv = require('dotenv');
 const bootcamps = require('./routes/bootcamps');
 const courses = require('./routes/courses');
 const auth = require('./routes/auth');
+const admin = require('./routes/admin');
+const superAdmin = require('./routes/superAdmin');
 const users = require('./routes/users');
 const reviews = require('./routes/reviews');
 
@@ -24,11 +26,10 @@ const cookieParser = require('cookie-parser');
 // Import passport
 const passport = require('passport');
 
+// Load env vars
+dotenv.config({ path: './config/config.env' });
 // Passport config
 require('./config/passport')(passport);
-// Load env vars
-
-dotenv.config({ path: './config/config.env' });
 
 // Connect DB
 
@@ -68,7 +69,7 @@ app.listen(
 );
 
 app.get('/', (req, res) => {
-  res.send('Hello API');
+  res.send('<h1>Hello API<h1>');
 });
 
 // Mount routes
@@ -76,6 +77,8 @@ app.get('/', (req, res) => {
 app.use('/api/v1/bootcamps', bootcamps);
 app.use('/api/v1/courses', courses);
 app.use('/api/v1/auth', auth);
+app.use('/api/v1/admin', admin);
+app.use('/api/v1/superadmin', superAdmin);
 app.use('/api/v1/users', users);
 app.use('/api/v1/reviews', reviews);
 

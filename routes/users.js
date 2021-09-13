@@ -1,4 +1,5 @@
 const express = require('express');
+const passport = require('passport');
 
 const {
   getUsers,
@@ -12,11 +13,10 @@ const User = require('../models/User');
 
 const router = express.Router();
 
-const { protect, authorize } = require('../middleware/auth');
+// const { protect, authorize } = require('../middleware/auth');
 const advanceResults = require('../middleware/advanceResults');
 
-router.use(protect);
-router.use(authorize('admin'));
+router.use(passport.authenticate(['admin'], { session: false }));
 router.route('/').get(advanceResults(User), getUsers).post(createUser);
 
 router.route('/:id').get(getUser).put(updateUser).delete(deleteUser);

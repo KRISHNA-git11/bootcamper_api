@@ -57,6 +57,7 @@ exports.addCourse = asyncHandler(async (req, res, next) => {
       )
     );
   }
+  const course = await Course.create(req.body);
 
   // Check if the user is the owner of the course or not
   if (course.user.toString() !== req.user.id && req.user.role !== 'admin') {
@@ -66,8 +67,6 @@ exports.addCourse = asyncHandler(async (req, res, next) => {
       )
     );
   }
-
-  const course = await Course.create(req.body);
 
   res.status(200).json({
     success: true,

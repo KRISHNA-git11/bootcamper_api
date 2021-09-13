@@ -3,8 +3,6 @@ const ErrorResponse = require('../utils/errorResponse');
 const User = require('../models/User');
 const sendEmail = require('../utils/sendEmail');
 const crypto = require('crypto');
-const passport = require('passport');
-// const passport = require('../config/passport');
 
 // @desc Register User
 // @route POST /api/v1/auth/register
@@ -25,30 +23,27 @@ exports.register = asyncHandler(async (req, res, next) => {
 // @route POST /api/v1/auth/login
 // @access PUBLIC
 exports.login = asyncHandler(async (req, res, next) => {
-  const { email, password } = req.body;
-
-  // check for email and password
-  if (!email || !password) {
-    return next(new ErrorResponse('Please enter email and password', 401));
-  }
+  const { email } = req.body;
 
   // find user
   const user = await User.findOne({ email }).select('+password');
 
-  // Check for user
-  if (!user) {
-    return next(new ErrorResponse('Please enter valid credentials', 401));
-  }
-
-  // Check if passwords match
-  const isMatch = await user.checkPassword(password);
-  if (!isMatch) {
-    return next(new ErrorResponse('Please enter valid credentials', 401));
-  }
-
-  // passport.authenticate('local', {});
-
+  // console.log('token');
   sendTokenResponse(user, 200, res);
+});
+
+// @desc Get user logged out
+// @route GET /api/v1/auth/logout
+// @access PRIVATE
+exports.logout = asyncHandler(async (req, res, next) => {
+  res.cookie('token', 'none', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+  });
+  res.status(200).json({
+    success: true,
+    data: {},
+  });
 });
 
 // @desc Get the current logged in user

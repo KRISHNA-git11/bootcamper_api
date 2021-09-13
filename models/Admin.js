@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs'); // Use bcrypt for passwords as it is difficu
 const crypto = require('crypto'); // Used for hashing tokens
 const jwt = require('jsonwebtoken');
 
-const UserSchema = mongoose.Schema({
+const AdminSchema = mongoose.Schema({
   name: {
     type: String,
     required: [true, 'Please add a name'],
@@ -19,8 +19,7 @@ const UserSchema = mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['user', 'publisher'],
-    default: 'user',
+    default: 'admin',
   },
   password: {
     type: String,
@@ -42,7 +41,7 @@ const UserSchema = mongoose.Schema({
 });
 
 // Encrypting password using bcrypt
-UserSchema.pre('save', async function (next) {
+AdminSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
     next();
   }
@@ -52,19 +51,19 @@ UserSchema.pre('save', async function (next) {
 });
 
 // Sign JWT and return
-UserSchema.methods.getSignedJwtToken = function () {
+AdminSchema.methods.getSignedJwtToken = function () {
   return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRE,
   });
 };
 
 // Check if entered password matches with hashed password
-UserSchema.methods.checkPassword = async function (enteredPassword) {
+AdminSchema.methods.checkPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
 // Generate and has the password reset token
-UserSchema.methods.getResetPasswordToken = function () {
+AdminSchema.methods.getResetPasswordToken = function () {
   // Generate the token
   const resetToken = crypto.randomBytes(20).toString('hex');
 
@@ -79,4 +78,4 @@ UserSchema.methods.getResetPasswordToken = function () {
 
   return resetToken;
 };
-module.exports = mongoose.model('User', UserSchema);
+module.exports = mongoose.model('Admin', AdminSchema);
