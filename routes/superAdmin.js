@@ -1,5 +1,6 @@
 const express = require('express');
 const passport = require('passport');
+const { changeStatus } = require('../controllers/changeStatus');
 const {
   registerSAdmin,
   loginSAdmin,
@@ -22,4 +23,11 @@ router.get(
   passport.authenticate(['superadmin'], { session: false }),
   getAdmins
 );
+
+router.post(
+  '/changeStatus/:id',
+  passport.authenticate(['superadmin'], { session: false }),
+  changeStatus
+);
+
 module.exports = router;

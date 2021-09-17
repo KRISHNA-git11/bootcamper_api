@@ -35,9 +35,9 @@ const UserSchema = mongoose.Schema({
     date: Date.now,
   },
   active: {
-    type: Number,
-    enum: [0, 1],
-    default: 1,
+    type: Boolean,
+    enum: [true, false],
+    default: true,
   },
 });
 
@@ -63,7 +63,7 @@ UserSchema.methods.checkPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-// Generate and has the password reset token
+// Generate and hash the password reset token
 UserSchema.methods.getResetPasswordToken = function () {
   // Generate the token
   const resetToken = crypto.randomBytes(20).toString('hex');

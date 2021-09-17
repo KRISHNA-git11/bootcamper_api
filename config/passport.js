@@ -1,7 +1,7 @@
 const LocalStrategy = require('passport-local').Strategy;
 const JwtStratagey = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
-
+const AnonymousStrategy = require('passport-anonymous').Strategy;
 // const mongoose = require('mongoose');
 
 const bcrypt = require('bcryptjs');
@@ -26,11 +26,12 @@ var cookieExtractor = (req) => {
 };
 
 module.exports = function (passport) {
+  passport.use('anonymous', new AnonymousStrategy());
   passport.use(
     'local',
     new LocalStrategy({ usernameField: 'email' }, (email, password, done) => {
       // Match User
-      User.findOne({ email: email })
+      User.findOne({ email: email, active: true })
         .select('+password')
         .then((user) => {
           //   console.log(user);
@@ -56,7 +57,7 @@ module.exports = function (passport) {
     'localAdmin',
     new LocalStrategy({ usernameField: 'email' }, (email, password, done) => {
       // Match User
-      Admin.findOne({ email: email })
+      Admin.findOne({ email: email, active: true })
         .select('+password')
         .then((user) => {
           //   console.log(user);
@@ -145,7 +146,7 @@ module.exports = function (passport) {
         jwtFromRequest: cookieExtractor,
       },
       (jwt_payload, done) => {
-        Admin.findOne({ _id: jwt_payload.id, active: 1 }, (err, user) => {
+        Admin.findOne({ _id: jwt_payload.id, active: true }, (err, user) => {
           if (err) {
             let errorMessage = new ErrorResponse('unauthorized access', 401);
             return done(err + errorMessage, false);
@@ -169,19 +170,22 @@ module.exports = function (passport) {
         jwtFromRequest: cookieExtractor,
       },
       (jwt_payload, done) => {
-        SuperAdmin.findOne({ _id: jwt_payload.id, active: 1 }, (err, user) => {
-          if (err) {
-            let errorMessage = new ErrorResponse('unauthorized access', 401);
-            console.log(err);
-            return done(err + errorMessage, false);
-            //   throw err;
+        SuperAdmin.findOne(
+          { _id: jwt_payload.id, active: true },
+          (err, user) => {
+            if (err) {
+              let errorMessage = new ErrorResponse('unauthorized access', 401);
+              console.log(err);
+              return done(err + errorMessage, false);
+              //   throw err;
+            }
+            if (user) {
+              return done(null, user);
+            } else {
+              return done(null, false);
+            }
           }
-          if (user) {
-            return done(null, user);
-          } else {
-            return done(null, false);
-          }
-        });
+        );
       }
     )
   );
