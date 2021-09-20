@@ -18,6 +18,7 @@ const router = express.Router();
 
 const advanceResults = require('../middleware/advanceResults');
 const { protect, authorize } = require('../middleware/auth');
+const passport = require('passport');
 
 // Re-route into other resource routers
 router.use('/:bootcampsId/courses', courseRouter);
@@ -25,7 +26,11 @@ router.use('/:bootcampsId/reviews', reviewRouter);
 
 router
   .route('/')
-  .get(advanceResults(Bootcamp, 'courses'), getBootcamps)
+  .get(
+    advanceResults(Bootcamp, 'courses'),
+    passport.authenticate(['anonymous'], { session: false }),
+    getBootcamps
+  )
   .post(protect, authorize('publisher', 'admin'), createBootcamps);
 
 router.route('/radius/:zipcode/:distance').get(getBootcampsInRadius);

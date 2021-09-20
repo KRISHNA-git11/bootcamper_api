@@ -12,10 +12,9 @@ exports.protect = asyncHandler(async (req, res, next) => {
   ) {
     // console.log(req.headers);
     token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies.token) {
+    token = req.cookies.token;
   }
-  // else if(req.cookies.token){
-  //     token = req.cookies.token
-  // }
 
   // Check for the token
   if (!token) {
@@ -26,6 +25,7 @@ exports.protect = asyncHandler(async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     console.log(decoded);
     req.user = await User.findById(decoded.id);
+    console.log(req.user);
     next();
   } catch (error) {
     return next(new ErrorResponse('Authorization failed', 401));
