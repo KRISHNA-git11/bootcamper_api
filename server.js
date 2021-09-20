@@ -25,6 +25,18 @@ const fileUpload = require('express-fileupload');
 const cookieParser = require('cookie-parser');
 // Import passport
 const passport = require('passport');
+// Import Express mongo sanitize
+const mongoSanitize = require('express-mongo-sanitize');
+// Import helmet
+const helmet = require('helmet');
+// Import XSS-Clean
+const xss = require('xss-clean');
+// Import express-rate-limit
+const rateLimit = require('express-rate-limit');
+// Import hpp(HTTP Params pollution)
+const hpp = require('hpp');
+// Import CORS
+const cors = require('cors');
 
 // Load env vars
 dotenv.config({ path: './config/config.env' });
@@ -62,6 +74,29 @@ if (process.env.NODE_ENV === 'development') {
 // File uploader
 app.use(fileUpload());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Add mongo sanitize middleware as global middleware
+app.use(mongoSanitize());
+
+// Set security headers
+app.use(helmet());
+
+// Prevent criss site scripting attacks
+app.use(xss());
+
+// Add rate limit(limiting no of calls that can be made in certain time)
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+});
+
+app.use(limiter);
+
+// Prevent http params pollution
+app.use(hpp());
+
+// Enable CORS
+app.use(cors());
 
 app.listen(
   PORT,
