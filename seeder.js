@@ -11,6 +11,7 @@ const Bootcamp = require('./models/Bootcamp');
 const Course = require('./models/Course');
 const User = require('./models/User');
 const Review = require('./models/Review');
+const Admin = require('./models/Admin');
 
 // connect to DB
 mongoose.connect(process.env.MONGO_DB_URI, {
@@ -43,6 +44,7 @@ const deleteData = async () => {
     await Course.deleteMany();
     await User.deleteMany();
     await Review.deleteMany();
+    await Admin.deleteMany();
     console.log('DATA DESTROYED ../..');
   } catch (error) {
     console.error(error);

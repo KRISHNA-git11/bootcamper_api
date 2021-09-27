@@ -6,6 +6,8 @@ const dotenv = require('dotenv');
 const bootcamps = require('./routes/bootcamps');
 const courses = require('./routes/courses');
 const auth = require('./routes/auth');
+const admin = require('./routes/admin');
+const superAdmin = require('./routes/superAdmin');
 const users = require('./routes/users');
 const reviews = require('./routes/reviews');
 
@@ -23,12 +25,23 @@ const fileUpload = require('express-fileupload');
 const cookieParser = require('cookie-parser');
 // Import passport
 const passport = require('passport');
+// Import Express mongo sanitize
+const mongoSanitize = require('express-mongo-sanitize');
+// Import helmet
+const helmet = require('helmet');
+// Import XSS-Clean
+const xss = require('xss-clean');
+// Import express-rate-limit
+const rateLimit = require('express-rate-limit');
+// Import hpp(HTTP Params pollution)
+const hpp = require('hpp');
+// Import CORS
+const cors = require('cors');
 
+// Load env vars
+dotenv.config({ path: './config/config.env' });
 // Passport config
 require('./config/passport')(passport);
-// Load env vars
-
-dotenv.config({ path: './config/config.env' });
 
 // Connect DB
 
@@ -62,13 +75,36 @@ if (process.env.NODE_ENV === 'development') {
 app.use(fileUpload());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Add mongo sanitize middleware as global middleware
+app.use(mongoSanitize());
+
+// Set security headers
+app.use(helmet());
+
+// Prevent criss site scripting attacks
+app.use(xss());
+
+// Add rate limit(limiting no of calls that can be made in certain time)
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+});
+
+app.use(limiter);
+
+// Prevent http params pollution
+app.use(hpp());
+
+// Enable CORS
+app.use(cors());
+
 app.listen(
   PORT,
   console.log(`Server running on ${PORT} in ${process.env.NODE_ENV} mode`)
 );
 
 app.get('/', (req, res) => {
-  res.send('Hello API');
+  res.send('<h1>Hello API<h1>');
 });
 
 // Mount routes
@@ -76,6 +112,8 @@ app.get('/', (req, res) => {
 app.use('/api/v1/bootcamps', bootcamps);
 app.use('/api/v1/courses', courses);
 app.use('/api/v1/auth', auth);
+app.use('/api/v1/admin', admin);
+app.use('/api/v1/superadmin', superAdmin);
 app.use('/api/v1/users', users);
 app.use('/api/v1/reviews', reviews);
 
