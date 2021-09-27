@@ -90,7 +90,7 @@ exports.sendResetToken = asyncHandler(async (req, res, next) => {
   try {
     await sendEmail({
       email: user.email,
-      subject: 'Password rest link',
+      subject: 'Password reset link',
       message,
     });
 
