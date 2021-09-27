@@ -103,10 +103,6 @@ app.listen(
   console.log(`Server running on ${PORT} in ${process.env.NODE_ENV} mode`)
 );
 
-app.get('/', (req, res) => {
-  res.send('<h1>Hello API<h1>');
-});
-
 // Mount routes
 
 app.use('/api/v1/bootcamps', bootcamps);
