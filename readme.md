@@ -24,7 +24,8 @@ npm start
 - Version: 1.0.0
 - License: MIT
 
-```
+
 # To get the markdown documentation in dev mode use
+```
 > http://localhost:5000/
 ```
