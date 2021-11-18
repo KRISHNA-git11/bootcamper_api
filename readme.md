@@ -26,5 +26,5 @@ npm start
 
 ```
 # To get the markdown documentation in dev mode use
-http://localhost:5000/
+> http://localhost:5000/
 ```
