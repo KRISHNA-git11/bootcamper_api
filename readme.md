@@ -14,10 +14,13 @@ npm install
 
 ## Run App
 
+
+## Run in dev mode
 ```
-# Run in dev mode
 npm run dev
-# Run in prod mode
+```
+## Run in prod mode
+```
 npm start
 ```
 
